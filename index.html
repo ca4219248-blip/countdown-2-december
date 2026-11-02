@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Countdown to 2 December</title>
-<meta name="description" content="A live countdown to 2 December 2026, 12:00 AM IST." />
+<title>Countdown to 2 December 2026</title>
+<meta name="description" content="Every second, tracked live. The clock hits zero at midnight IST on 2 December 2026." />
 <meta name="theme-color" content="#0a0a12" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9203;</text></svg>" />
 <style>
@@ -38,7 +38,6 @@
     -webkit-font-smoothing:antialiased;
   }
 
-  /* ambient glow blobs */
   .glow{
     position:fixed;
     border-radius:50%;
@@ -90,6 +89,37 @@
     animation:pulse 1.6s ease-in-out infinite;
   }
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.8);}}
+
+  .nav{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:clamp(20px,3vw,32px);
+    width:100%;
+    max-width:980px;
+  }
+  .nav a{
+    font-size:12px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    text-decoration:none;
+    border:1px solid var(--stroke);
+    background:var(--card);
+    padding:7px 14px;
+    border-radius:999px;
+    transition:color .2s,border-color .2s,background .2s;
+    white-space:nowrap;
+  }
+  .nav a:hover{color:var(--ink);border-color:rgba(255,255,255,.28);}
+  .nav a.active{
+    color:#fff;
+    border-color:transparent;
+    background:linear-gradient(100deg,var(--accent),var(--accent2));
+    box-shadow:0 8px 26px -12px rgba(255,77,109,.9);
+  }
 
   h1{
     font-size:clamp(28px,5.4vw,58px);
@@ -193,6 +223,13 @@
   }
   .bar-meta b{color:var(--ink);font-weight:600;}
 
+  .since{
+    font-size:clamp(13px,1.7vw,16px);
+    color:var(--muted);
+    letter-spacing:.04em;
+  }
+  .since b{color:var(--ink);font-weight:600;}
+
   footer{
     position:relative;
     z-index:1;
@@ -203,8 +240,9 @@
     text-align:center;
     line-height:1.8;
   }
+  footer a{color:rgba(154,154,176,.9);text-decoration:none;}
+  footer a:hover{color:var(--ink);}
 
-  /* reached state */
   body.done .clock,
   body.done .progress-wrap{display:none;}
   .celebrate{
@@ -237,11 +275,16 @@
   <div class="glow b"></div>
   <div class="glow c"></div>
 
+  <nav class="nav"><a href="/countdown-2-december/" class="active">2 Dec 2026</a>
+    <a href="/countdown-2-december/october-10-2026/">10 Oct 2026</a>
+    <a href="/countdown-2-december/january-1-2027/">1 Jan 2027</a>
+    <a href="/countdown-2-december/october-2-2027/">2 Oct 2027</a></nav>
+
   <main class="stage">
     <span class="brand"><span class="dot"></span> TFG GAMING</span>
 
-    <h1>Counting down to <span class="grad">2 December</span></h1>
-    <p class="sub" id="sub">Every second, tracked live. The clock hits zero at midnight IST on 2 December 2026.</p>
+    <h1>Counting down to <span class="grad">2 December 2026</span></h1>
+    <p class="sub">Every second, tracked live. The clock hits zero at midnight IST on 2 December 2026.</p>
 
     <section class="clock" aria-live="polite" aria-label="Time remaining">
       <div class="unit"><span class="num" id="days">00</span><span class="label">Days</span></div>
@@ -260,20 +303,19 @@
 
     <div class="celebrate">
       <div class="big">It's here.</div>
-      <p class="sub">2 December 2026 has arrived. The countdown is done.</p>
+      <p class="sub">The countdown is done &mdash; this day has arrived.</p>
     </div>
   </main>
 
   <footer>
-    Live countdown &middot; 2 December 2026, 12:00 AM IST (UTC+05:30)<br />
+    Live clock &middot; 2 December 2026 at 12:00 AM IST (UTC+05:30)<br />
     Built by TFG GAMING
   </footer>
 
 <script>
-  // Config: target moment is 2 December 2026, 00:00:00 IST (UTC+05:30)
   const TARGET = new Date("2026-12-02T00:00:00+05:30").getTime();
-  // Progress is measured from this start point.
   const START  = new Date("2026-11-02T00:00:00+05:30").getTime();
+  const MODE   = "countdown";
 
   const el = {
     days:    document.getElementById("days"),
@@ -283,12 +325,13 @@
     fill:    document.getElementById("fill"),
     pct:     document.getElementById("pct"),
     total:   document.getElementById("total"),
+    ago:     document.getElementById("ago"),
   };
 
   const pad = (n) => String(n).padStart(2, "0");
 
-  // Only re-animate a digit block when its value actually changes.
   function set(node, value) {
+    if (!node) return;
     const text = pad(value);
     if (node.textContent === text) return;
     node.textContent = text;
@@ -299,7 +342,21 @@
 
   function render() {
     const now = Date.now();
-    let diff = TARGET - now;
+
+    if (MODE === "countup") {
+      const sec = Math.floor((now - TARGET) / 1000);
+      const d = Math.floor(sec / 86400);
+      const h = Math.floor((sec % 86400) / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      set(el.days, d); set(el.hours, h); set(el.minutes, m); set(el.seconds, s);
+      if (el.ago) {
+        el.ago.textContent = d.toLocaleString("en-IN") + " days, " + h + " hours and " + m + " minutes ago";
+      }
+      return;
+    }
+
+    const diff = TARGET - now;
 
     if (diff <= 0) {
       document.body.classList.add("done");
@@ -314,17 +371,14 @@
     const m = Math.floor((sec % 3600) / 60);
     const s = sec % 60;
 
-    set(el.days, d);
-    set(el.hours, h);
-    set(el.minutes, m);
-    set(el.seconds, s);
+    set(el.days, d); set(el.hours, h); set(el.minutes, m); set(el.seconds, s);
 
     const span = TARGET - START;
     const done = Math.min(Math.max(now - START, 0), span);
     const pct = span > 0 ? (done / span) * 100 : 100;
-    el.fill.style.width = pct.toFixed(2) + "%";
-    el.pct.textContent = pct.toFixed(1) + "%";
-    el.total.textContent = sec.toLocaleString("en-IN") + " seconds left";
+    if (el.fill) el.fill.style.width = pct.toFixed(2) + "%";
+    if (el.pct) el.pct.textContent = pct.toFixed(1) + "%";
+    if (el.total) el.total.textContent = sec.toLocaleString("en-IN") + " seconds left";
   }
 
   render();
