@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Countdown to 1 January 2027</title>
+<meta name="description" content="Every second, tracked live. The clock hits zero at midnight IST on 1 January 2027." />
+<meta name="theme-color" content="#0a0a12" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9203;</text></svg>" />
+<style>
+  :root{
+    --bg:#07070d;
+    --ink:#f4f4f8;
+    --muted:#9a9ab0;
+    --accent:#ff4d6d;
+    --accent2:#7c5cff;
+    --accent3:#22d3ee;
+    --card:rgba(255,255,255,0.045);
+    --stroke:rgba(255,255,255,0.10);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{height:100%;}
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:clamp(20px,4vw,48px);
+    overflow-x:hidden;
+    position:relative;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .glow{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(90px);
+    opacity:.45;
+    pointer-events:none;
+    z-index:0;
+    animation:drift 18s ease-in-out infinite alternate;
+  }
+  .glow.a{width:44vmax;height:44vmax;background:radial-gradient(circle,#ff4d6d,transparent 65%);top:-16vmax;left:-12vmax;}
+  .glow.b{width:40vmax;height:40vmax;background:radial-gradient(circle,#7c5cff,transparent 65%);bottom:-18vmax;right:-10vmax;animation-delay:-6s;}
+  .glow.c{width:30vmax;height:30vmax;background:radial-gradient(circle,#22d3ee,transparent 65%);bottom:10%;left:20%;opacity:.22;animation-delay:-11s;}
+
+  @keyframes drift{
+    from{transform:translate3d(0,0,0) scale(1);}
+    to{transform:translate3d(4vmax,-3vmax,0) scale(1.12);}
+  }
+
+  .stage{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:980px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:clamp(24px,4vw,40px);
+    text-align:center;
+  }
+
+  .brand{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-size:12px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--muted);
+    border:1px solid var(--stroke);
+    background:var(--card);
+    padding:8px 16px;
+    border-radius:999px;
+    backdrop-filter:blur(8px);
+  }
+  .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--accent3);
+    box-shadow:0 0 12px var(--accent3);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.8);}}
+
+  .nav{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:clamp(20px,3vw,32px);
+    width:100%;
+    max-width:980px;
+  }
+  .nav a{
+    font-size:12px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    text-decoration:none;
+    border:1px solid var(--stroke);
+    background:var(--card);
+    padding:7px 14px;
+    border-radius:999px;
+    transition:color .2s,border-color .2s,background .2s;
+    white-space:nowrap;
+  }
+  .nav a:hover{color:var(--ink);border-color:rgba(255,255,255,.28);}
+  .nav a.active{
+    color:#fff;
+    border-color:transparent;
+    background:linear-gradient(100deg,var(--accent),var(--accent2));
+    box-shadow:0 8px 26px -12px rgba(255,77,109,.9);
+  }
+
+  h1{
+    font-size:clamp(28px,5.4vw,58px);
+    line-height:1.08;
+    font-weight:800;
+    letter-spacing:-.02em;
+    max-width:20ch;
+  }
+  h1 .grad{
+    background:linear-gradient(100deg,var(--accent),var(--accent2) 55%,var(--accent3));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  .sub{
+    color:var(--muted);
+    font-size:clamp(14px,1.7vw,17px);
+    line-height:1.6;
+    max-width:46ch;
+    margin-top:-18px;
+  }
+
+  .clock{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:clamp(8px,1.6vw,18px);
+    width:100%;
+  }
+
+  .unit{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--stroke);
+    border-radius:clamp(14px,2vw,22px);
+    padding:clamp(14px,2.6vw,30px) clamp(4px,1vw,16px);
+    backdrop-filter:blur(12px);
+    overflow:hidden;
+    box-shadow:0 24px 60px -32px rgba(0,0,0,.9);
+  }
+  .unit::before{
+    content:"";
+    position:absolute;
+    inset:0 0 auto 0;
+    height:2px;
+    background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);
+    opacity:.85;
+  }
+  .num{
+    display:block;
+    font-size:clamp(34px,9vw,84px);
+    font-weight:800;
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.03em;
+    background:linear-gradient(180deg,#ffffff,#b9b9d6);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .label{
+    display:block;
+    margin-top:10px;
+    font-size:clamp(9px,1.3vw,12px);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  .tick{animation:flip .45s ease;}
+  @keyframes flip{
+    0%{transform:translateY(-8px);opacity:.25;}
+    100%{transform:translateY(0);opacity:1;}
+  }
+
+  .progress-wrap{width:100%;max-width:640px;display:flex;flex-direction:column;gap:10px;}
+  .bar{
+    height:8px;
+    width:100%;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    overflow:hidden;
+    border:1px solid var(--stroke);
+  }
+  .bar > i{
+    display:block;
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));
+    box-shadow:0 0 18px rgba(124,92,255,.7);
+    transition:width .8s cubic-bezier(.22,1,.36,1);
+  }
+  .bar-meta{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:clamp(11px,1.4vw,13px);
+    color:var(--muted);
+    letter-spacing:.04em;
+  }
+  .bar-meta b{color:var(--ink);font-weight:600;}
+
+  .since{
+    font-size:clamp(13px,1.7vw,16px);
+    color:var(--muted);
+    letter-spacing:.04em;
+  }
+  .since b{color:var(--ink);font-weight:600;}
+
+  footer{
+    position:relative;
+    z-index:1;
+    margin-top:clamp(28px,5vw,52px);
+    font-size:12px;
+    color:rgba(154,154,176,.7);
+    letter-spacing:.08em;
+    text-align:center;
+    line-height:1.8;
+  }
+  footer a{color:rgba(154,154,176,.9);text-decoration:none;}
+  footer a:hover{color:var(--ink);}
+
+  body.done .clock,
+  body.done .progress-wrap{display:none;}
+  .celebrate{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+  body.done .celebrate{display:flex;}
+  .celebrate .big{
+    font-size:clamp(40px,10vw,96px);
+    font-weight:800;
+    letter-spacing:-.03em;
+    background:linear-gradient(100deg,var(--accent),var(--accent2),var(--accent3));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  @media (max-width:560px){
+    .clock{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+  <div class="glow c"></div>
+
+  <nav class="nav"><a href="/countdown-2-december/">2 Dec 2026</a>
+    <a href="/countdown-2-december/october-10-2026/">10 Oct 2026</a>
+    <a href="/countdown-2-december/january-1-2027/" class="active">1 Jan 2027</a>
+    <a href="/countdown-2-december/october-2-2027/">2 Oct 2027</a></nav>
+
+  <main class="stage">
+    <span class="brand"><span class="dot"></span> TFG GAMING</span>
+
+    <h1>Counting down to <span class="grad">1 January 2027</span></h1>
+    <p class="sub">Every second, tracked live. The clock hits zero at midnight IST on 1 January 2027.</p>
+
+    <section class="clock" aria-live="polite" aria-label="Time remaining">
+      <div class="unit"><span class="num" id="days">00</span><span class="label">Days</span></div>
+      <div class="unit"><span class="num" id="hours">00</span><span class="label">Hours</span></div>
+      <div class="unit"><span class="num" id="minutes">00</span><span class="label">Minutes</span></div>
+      <div class="unit"><span class="num" id="seconds">00</span><span class="label">Seconds</span></div>
+    </section>
+
+    <div class="progress-wrap">
+      <div class="bar"><i id="fill"></i></div>
+      <div class="bar-meta">
+        <span><b id="pct">0%</b> of the wait is over</span>
+        <span id="total">&mdash; seconds left</span>
+      </div>
+    </div>
+
+    <div class="celebrate">
+      <div class="big">It's here.</div>
+      <p class="sub">The countdown is done &mdash; this day has arrived.</p>
+    </div>
+  </main>
+
+  <footer>
+    Live clock &middot; 1 January 2027 at 12:00 AM IST (UTC+05:30)<br />
+    Built by TFG GAMING
+  </footer>
+
+<script>
+  const TARGET = new Date("2027-01-01T00:00:00+05:30").getTime();
+  const START  = new Date("2026-11-02T00:00:00+05:30").getTime();
+  const MODE   = "countdown";
+
+  const el = {
+    days:    document.getElementById("days"),
+    hours:   document.getElementById("hours"),
+    minutes: document.getElementById("minutes"),
+    seconds: document.getElementById("seconds"),
+    fill:    document.getElementById("fill"),
+    pct:     document.getElementById("pct"),
+    total:   document.getElementById("total"),
+    ago:     document.getElementById("ago"),
+  };
+
+  const pad = (n) => String(n).padStart(2, "0");
+
+  function set(node, value) {
+    if (!node) return;
+    const text = pad(value);
+    if (node.textContent === text) return;
+    node.textContent = text;
+    node.classList.remove("tick");
+    void node.offsetWidth;
+    node.classList.add("tick");
+  }
+
+  function render() {
+    const now = Date.now();
+
+    if (MODE === "countup") {
+      const sec = Math.floor((now - TARGET) / 1000);
+      const d = Math.floor(sec / 86400);
+      const h = Math.floor((sec % 86400) / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      set(el.days, d); set(el.hours, h); set(el.minutes, m); set(el.seconds, s);
+      if (el.ago) {
+        el.ago.textContent = d.toLocaleString("en-IN") + " days, " + h + " hours and " + m + " minutes ago";
+      }
+      return;
+    }
+
+    const diff = TARGET - now;
+
+    if (diff <= 0) {
+      document.body.classList.add("done");
+      el.days.textContent = el.hours.textContent = "00";
+      el.minutes.textContent = el.seconds.textContent = "00";
+      return;
+    }
+
+    const sec = Math.floor(diff / 1000);
+    const d = Math.floor(sec / 86400);
+    const h = Math.floor((sec % 86400) / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+
+    set(el.days, d); set(el.hours, h); set(el.minutes, m); set(el.seconds, s);
+
+    const span = TARGET - START;
+    const done = Math.min(Math.max(now - START, 0), span);
+    const pct = span > 0 ? (done / span) * 100 : 100;
+    if (el.fill) el.fill.style.width = pct.toFixed(2) + "%";
+    if (el.pct) el.pct.textContent = pct.toFixed(1) + "%";
+    if (el.total) el.total.textContent = sec.toLocaleString("en-IN") + " seconds left";
+  }
+
+  render();
+  setInterval(render, 1000);
+</script>
+</body>
+</html>
